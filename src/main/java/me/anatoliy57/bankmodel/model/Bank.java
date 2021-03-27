@@ -48,7 +48,7 @@ public class Bank {
 
     public void putCash(int amount) {
         cashDesk.putCash(amount);
-        if (waitQueue.size() != 0) {
+        if (waitQueue.size() != 0 && waitQueue.size() != 0) {
             tellers.forEach(Teller::wakeup);
         }
     }
