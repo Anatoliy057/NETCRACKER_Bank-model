@@ -1,7 +1,6 @@
 package me.anatoliy57.bankmodel.domain;
 
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * An entity that stores the configuration parameters of the simulation of the bank work
@@ -9,6 +8,9 @@ import lombok.ToString;
  * @author Udarczev Anatoliy
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @ToString
 public class Configuration {
 

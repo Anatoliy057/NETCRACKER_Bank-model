@@ -1,5 +1,6 @@
 package me.anatoliy57.bankmodel.model;
 
+import lombok.Getter;
 import me.anatoliy57.bankmodel.domain.Configuration;
 import me.anatoliy57.bankmodel.domain.Client;
 import me.anatoliy57.bankmodel.view.LoggerFactory;
@@ -16,6 +17,7 @@ import java.util.Random;
  *
  * @author Udarczev Anatoliy
  */
+@Getter
 public class ClientsFlow implements Runnable {
 
     /** List of tellers */

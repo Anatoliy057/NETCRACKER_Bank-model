@@ -1,5 +1,6 @@
 package me.anatoliy57.bankmodel.domain;
 
+import lombok.Builder;
 import lombok.ToString;
 import lombok.Value;
 import me.anatoliy57.bankmodel.enums.TypeOperation;

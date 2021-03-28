@@ -1,9 +1,11 @@
 package me.anatoliy57.bankmodel.model;
 
+import lombok.Getter;
 import me.anatoliy57.bankmodel.domain.Configuration;
 import me.anatoliy57.bankmodel.domain.Client;
 import me.anatoliy57.bankmodel.enums.TypeOperation;
 import me.anatoliy57.bankmodel.exceptions.NegativeCashBoxException;
+import me.anatoliy57.bankmodel.exceptions.NegativePutCashBoxException;
 import me.anatoliy57.bankmodel.view.LoggerFactory;
 import me.anatoliy57.bankmodel.view.log.abstraction.CashBoxLogger;
 
@@ -23,7 +25,8 @@ public class CashBox {
     private final WaitQueue waitQueue;
 
     /** Amount money in cash box */
-    private int cashDesk;
+    @Getter
+    private int cash;
     /** Logger for trace cash box */
     private final CashBoxLogger logger;
 
@@ -40,7 +43,7 @@ public class CashBox {
         this.listeners = listeners;
         this.waitQueue = waitQueue;
 
-        cashDesk = config.getAmountCashBox();
+        cash = config.getAmountCashBox();
         logger = loggerFactory.factoryCashBoxLogger();
 
         locker = new ReentrantLock();
@@ -51,10 +54,14 @@ public class CashBox {
      *
      * @param amount amount money
      */
-    public void putCash(int amount) {
-        logger.logPut(cashDesk, amount);
+    public void putCash(int amount) throws NegativePutCashBoxException {
+        if (amount < 0) {
+            throw new NegativePutCashBoxException(amount);
+        }
 
-        cashDesk += amount;
+        logger.logPut(cash, amount);
+
+        cash += amount;
 
         if (!waitQueue.isEmpty()) {
             listeners.forEach(Teller::wakeUp);
@@ -69,12 +76,12 @@ public class CashBox {
      */
     public void withdrawCash(int amount) throws NegativeCashBoxException {
         if (!canWithdrawCash(amount)) {
-            throw new NegativeCashBoxException(cashDesk, amount);
+            throw new NegativeCashBoxException(cash, amount);
         }
 
-        logger.logWithdraw(cashDesk, amount);
+        logger.logWithdraw(cash, amount);
 
-        cashDesk -= amount;
+        cash -= amount;
     }
 
     /**
@@ -94,7 +101,7 @@ public class CashBox {
      * @return is it possible withdraw
      */
     public boolean canWithdrawCash(int amount) {
-        return cashDesk - amount >= 0;
+        return cash - amount >= 0;
     }
 
     public void lock() {
