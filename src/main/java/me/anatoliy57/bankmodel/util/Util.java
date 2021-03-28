@@ -5,6 +5,11 @@ import lombok.experimental.UtilityClass;
 
 import java.util.Random;
 
+/**
+ * Helper class
+ *
+ * @author Udarczev Anatoliy
+ */
 @UtilityClass
 public class Util {
 

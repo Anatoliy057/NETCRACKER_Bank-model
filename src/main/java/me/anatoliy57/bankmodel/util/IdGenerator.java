@@ -1,7 +1,10 @@
 package me.anatoliy57.bankmodel.util;
 
-import lombok.experimental.UtilityClass;
-
+/**
+ * Generator unique ids
+ *
+ * @author Udarczev Anatoliy
+ */
 public class IdGenerator {
 
     private long id = -1;
