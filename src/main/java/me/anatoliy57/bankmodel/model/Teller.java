@@ -3,10 +3,10 @@ package me.anatoliy57.bankmodel.model;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import me.anatoliy57.bankmodel.enums.TypeOperation;
-import me.anatoliy57.bankmodel.domain.pojo.Message;
-import me.anatoliy57.bankmodel.domain.values.BankCashDesk;
-import me.anatoliy57.bankmodel.domain.values.Client;
-import me.anatoliy57.bankmodel.model.log.Logger;
+import me.anatoliy57.bankmodel.domain.Client;
+import me.anatoliy57.bankmodel.util.IdGenerator;
+import me.anatoliy57.bankmodel.view.LoggerFactory;
+import me.anatoliy57.bankmodel.view.log.abstraction.TellerLogger;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -14,27 +14,31 @@ import java.util.Optional;
 @Getter
 public class Teller implements Runnable {
 
-    private final int id;
-    private final Logger logger;
-    private final Bank bank;
-    private final BankCashDesk cashDesk;
-    private final LinkedList<Client> queue;
+    private final static IdGenerator idGenerator = new IdGenerator();
+
+    private final long id;
+
+    private final CashDesk cashDesk;
     private final WaitQueue waitQueue;
+
+    private final TellerLogger logger;
+    private final LinkedList<Client> queue;
 
     private final Object waiter = new Object();
 
-    public Teller(int id, Bank bank, WaitQueue waitQueue, Logger logger) {
-        this.id = id;
-        this.bank = bank;
-        this.cashDesk = bank.getCashDesk();
+    public Teller(CashDesk cashDesk, WaitQueue waitQueue, LoggerFactory loggerFactory) {
+        id = idGenerator.generateId();
+
         this.waitQueue = waitQueue;
-        this.logger = logger;
-        this.queue = new LinkedList<>();
+        this.cashDesk = cashDesk;
+
+        logger = loggerFactory.factoryTellerLogger(id);
+        queue = new LinkedList<>();
     }
 
     public void addToQueue(Client client) {
         synchronized (queue) {
-            logger.log(Message.gotInQueue(id, client));
+            logger.logEnter(client);
             queue.addLast(client);
             wakeup();
         }
@@ -75,18 +79,20 @@ public class Teller implements Runnable {
             optClient = waitQueue.takeClient(this);
             if (optClient.isPresent()) {
                 currentClient = optClient.get();
+                logger.logServicing(currentClient);
                 doOperation(currentClient);
-                logger.log(Message.servicing(id, currentClient));
+
             } else {
                 optClient = pollClient();
                 if (optClient.isPresent()) {
                     currentClient = optClient.get();
                     if (isPossibleToService(currentClient)) {
+                        logger.logServicing(currentClient);
                         doOperation(currentClient);
-                        logger.log(Message.servicing(id, currentClient));
+
                     } else {
+                        logger.logRejected(currentClient);
                         waitQueue.addClient(currentClient);
-                        logger.log(Message.rejected(id, currentClient));
                         currentClient = null;
                     }
                 }
@@ -94,15 +100,15 @@ public class Teller implements Runnable {
 
             cashDesk.unlock();
 
-
             try {
                 if (currentClient == null) {
                     synchronized (waiter) {
                         waiter.wait();
                     }
+
                 } else {
                     service(currentClient);
-                    logger.log(Message.serviced(id, currentClient));
+                    logger.logServiced(currentClient);
                 }
             } catch (InterruptedException ignored) {
                 return;
@@ -121,7 +127,7 @@ public class Teller implements Runnable {
         TypeOperation type = client.getType();
         switch (type) {
             case WITHDRAW -> cashDesk.withdrawCash(client.getAmount());
-            case PUT -> bank.putCash(client.getAmount());
+            case PUT -> cashDesk.putCash(client.getAmount());
             default -> throw new NullPointerException("Type of operation is null");
         }
     }

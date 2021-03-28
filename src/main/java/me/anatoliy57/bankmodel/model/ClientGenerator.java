@@ -1,6 +1,7 @@
-package me.anatoliy57.bankmodel.domain.values;
+package me.anatoliy57.bankmodel.model;
 
 import me.anatoliy57.bankmodel.Configuration;
+import me.anatoliy57.bankmodel.domain.Client;
 import me.anatoliy57.bankmodel.enums.TypeOperation;
 import me.anatoliy57.bankmodel.util.Util;
 
@@ -13,6 +14,7 @@ public class ClientGenerator {
 
     public ClientGenerator(Configuration config) {
         this.config = config;
+
         random = new Random();
     }
 

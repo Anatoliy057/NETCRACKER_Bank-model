@@ -2,8 +2,7 @@ package me.anatoliy57.bankmodel.model;
 
 import lombok.Getter;
 import me.anatoliy57.bankmodel.Configuration;
-import me.anatoliy57.bankmodel.domain.values.BankCashDesk;
-import me.anatoliy57.bankmodel.model.log.Logger;
+import me.anatoliy57.bankmodel.view.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,27 +11,27 @@ public class Bank {
 
     private final Configuration config;
     @Getter
-    private final BankCashDesk cashDesk;
+    private final CashDesk cashDesk;
     private final WaitQueue waitQueue;
     private final ClientFlow clientFlow;
 
-    private List<Teller> tellers;
-    private List<Thread> threads;
+    private final List<Teller> tellers;
+    private final List<Thread> threads;
 
-    public Bank(Configuration config, Logger logger) {
+    public Bank(Configuration config, LoggerFactory loggerFactory) {
         this.config = config;
 
-        cashDesk = new BankCashDesk(config);
-        waitQueue = new WaitQueue(logger);
+        waitQueue = new WaitQueue(loggerFactory);
 
         int n = config.getNumberTellers();
         tellers = new ArrayList<>(n);
+        cashDesk = new CashDesk(config, tellers, waitQueue, loggerFactory);
         for (int i = 0; i < n; i++) {
-            tellers.add(new Teller(i, this, waitQueue, logger));
+            tellers.add(new Teller(cashDesk, waitQueue, loggerFactory));
         }
-        threads = new ArrayList<>();
 
-        clientFlow = new ClientFlow(config, tellers, logger);
+        threads = new ArrayList<>();
+        clientFlow = new ClientFlow(config, tellers, loggerFactory);
     }
 
     public void start() {
@@ -44,12 +43,5 @@ public class Bank {
 
     public void stop() {
         threads.forEach(Thread::interrupt);
-    }
-
-    public void putCash(int amount) {
-        cashDesk.putCash(amount);
-        if (waitQueue.size() != 0 && waitQueue.size() != 0) {
-            tellers.forEach(Teller::wakeup);
-        }
     }
 }

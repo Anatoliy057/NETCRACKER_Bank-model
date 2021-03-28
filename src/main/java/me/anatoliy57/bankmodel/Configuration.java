@@ -19,6 +19,7 @@ public class Configuration {
     private int averageAmount;
     private int amountScatter;
     private int amountCashDesk;
+    private int timeToSimulation;
 
     @Getter(AccessLevel.NONE)
     private final Scanner scanner;
@@ -31,28 +32,34 @@ public class Configuration {
         numberClientsScatter = (int) (averageNumberClients * 0.3) + 1;
         averageAmount = 30;
         amountScatter = (int) (averageAmount * 0.3) + 1;
-        amountCashDesk = 100;
+        amountCashDesk = 10;
     }
 
     private void init() {
         readNumberTellers();
         readAverageServiceTime();
         readAverageNumberClientsPerMinute();
+        readTimeToSimulation();
     }
 
     private void readAverageServiceTime() {
-        out("Введите среднее время обслуживание");
+        out("Enter the average service time (seconds)");
         averageServiceTime = readInt();
     }
 
     private void readNumberTellers() {
-        out("Введите количество операционистов");
+        out("Enter the number of tellers");
         numberTellers = readInt();
     }
 
     private void readAverageNumberClientsPerMinute() {
-        out("Введите среднее количество клиентов в минуту");
+        out("Enter the average number of clients per minute");
         averageNumberClients = (int) Math.round(60000.0/readInt());
+    }
+
+    private void readTimeToSimulation() {
+        out("Enter simulation time (seconds)");
+        timeToSimulation = readInt();
     }
 
     private int readInt() {

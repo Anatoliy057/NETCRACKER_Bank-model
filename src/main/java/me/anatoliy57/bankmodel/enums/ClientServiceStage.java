@@ -1,12 +1,10 @@
 package me.anatoliy57.bankmodel.enums;
 
-public enum ClientStage {
+public enum ClientServiceStage {
 
-    CREATED,
-    GOT_IN_QUEUE,
+    ENTER,
     REJECTED,
     SERVICING,
     SERVICED,
-    OUT_OF_PRIORITY_QUEUE,
     ;
 }
