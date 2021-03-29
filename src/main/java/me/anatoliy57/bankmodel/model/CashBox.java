@@ -53,6 +53,7 @@ public class CashBox {
      * Put money in the cash box
      *
      * @param amount amount money
+     * @throws NegativePutCashBoxException if amount less 0
      */
     public void putCash(int amount) throws NegativePutCashBoxException {
         if (amount < 0) {
